@@ -1,0 +1,11 @@
+Borrower_Name,Loan_Amount_M,Collateral_Value_M,Sector,Corridor,Latitude,Longitude,Elevation_M,Flood_Hazard_Zone,Heat_Hazard_Zone
+Tata Steel Jamshedpur Plant,185.5,250.0,Heavy Manufacturing,Eastern Industrial Corridor,22.8046,86.2029,145,Low,High
+Adani Mundra Port Terminal,320.0,420.0,Logistics & Shipping,Coastal Economic Corridor,22.8429,70.0477,3,Critical,High
+Mahindra Automotive Pune,95.0,128.0,Automobile Manufacturing,Pune-Mumbai Industrial Belt,18.5204,73.8567,560,Low,Medium
+ITC Agro Processing Unit - Bihar,42.5,55.0,Agriculture & Food,Bihar Agricultural Zone,25.5941,85.1376,52,High,High
+Reliance Petrochemicals Jamnagar,510.0,680.0,Energy & Petroleum,Gujarat Coastal Industrial,22.4707,70.0577,8,High,High
+NTPC Solar Farm - Rajasthan,78.0,95.0,Renewable Energy,Rajasthan Energy Corridor,26.9124,70.9006,240,Low,Critical
+Larsen & Toubro Construction,135.0,175.0,Infrastructure,National Capital Region,28.6139,77.2090,216,Moderate,High
+Amul Dairy Processing - Anand,28.5,38.0,Agriculture & Food,Gujarat Agricultural Belt,22.5645,72.9289,45,Moderate,Medium
+Jindal Steel Raipur,220.0,295.0,Heavy Manufacturing,Chhattisgarh Industrial Zone,21.2514,81.6296,298,Moderate,High
+Cochin Shipyard Kerala,67.0,88.0,Maritime & Defense,Kerala Coastal Corridor,9.9312,76.2673,2,Critical,Medium

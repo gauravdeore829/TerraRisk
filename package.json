@@ -1,0 +1,13 @@
+{
+  "name": "fution",
+  "version": "1.0.0",
+  "description": "**Production-Grade Basel III & NGFS Multi-Hazard Credit Risk Analytics Platform**",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "python app.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

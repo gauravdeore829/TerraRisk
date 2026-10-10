@@ -1,0 +1,36 @@
+Loan_ID,Borrower_Name,Sector,Corridor,Loan_Amount_M,Collateral_Value_M,Annual_Revenue_M,Bank_Balance_M,Latitude,Longitude,Elevation_M,Flood_Hazard_Zone,Heat_Hazard_Zone
+KGL-DEF-2024-5001,Sovereign Marine Freight Corp,"Ports, Maritime & Freight",Chennai-Ennore Logistics Corridor,38.51,50.34,112.02,32.5,13.03261,80.23263,7.3,High (Urban Floodplain),Medium
+KGL-DEF-2024-5002,Bharat Heavy Electro-Chemicals,Heavy Manufacturing & Chemicals,Bengaluru Electronic City Upland,27.82,40.86,41.8,8.29,12.91609,77.64613,920.0,Low (Inland Upland),Low
+KGL-DEF-2024-5003,Narmada Agro Bio-Refineries,Commercial Real Estate & Warehouses,Hyderabad Industrial & Tech Plateau,16.38,25.0,21.6,6.27,17.40748,78.45584,542.4,Low (Plateau),High
+KGL-DEF-2024-5004,Konkan Container & Logistics,Commercial Real Estate & Warehouses,Hyderabad Industrial & Tech Plateau,38.78,46.66,59.41,16.12,17.37854,78.49302,540.4,Low (Plateau),High
+KGL-DEF-2024-5005,Tapi Valley Textile Mills,Heavy Manufacturing & Chemicals,Punjab Agro-Industrial Basin,54.3,76.88,42.52,16.83,30.86099,75.90475,240.6,Moderate (Canal Overflow),High
+KGL-DEF-2024-5006,Coromandel Cold Storage Ltd,Retail & Commercial SME,Punjab Agro-Industrial Basin,47.35,68.9,74.75,14.94,30.96728,75.79991,241.1,Moderate (Canal Overflow),High
+KGL-DEF-2024-5007,Ganga Delta Grain Silos,Heavy Manufacturing & Chemicals,Surat-Tapi Delta Corridor,52.36,85.76,18.36,4.66,21.23114,72.7625,4.6,High (Riverine Delta),High
+KGL-DEF-2024-5008,Deccan Heavy Metallurgicals,Retail & Commercial SME,Bengaluru Electronic City Upland,44.84,70.36,29.73,6.05,13.04224,77.58497,922.6,Low (Inland Upland),Low
+KGL-DEF-2024-5009,Malabar Agro Products Trust,Agriculture & Agro-Processing,Kolkata-Hooghly Estuary Basin,32.88,50.79,50.44,8.59,22.54567,88.28425,4.2,High (Cyclonic/Estuary),High
+KGL-DEF-2024-5010,Sanand Precision Automotives,Agriculture & Agro-Processing,Surat-Tapi Delta Corridor,16.02,20.12,113.41,25.52,21.25679,72.90329,3.1,High (Riverine Delta),High
+KGL-DEF-2024-5011,Sundarbans Coastal Aqua Mills,Heavy Manufacturing & Chemicals,Kolkata-Hooghly Estuary Basin,36.04,55.07,16.49,4.43,22.4906,88.33447,6.3,High (Cyclonic/Estuary),High
+KGL-DEF-2024-5012,Ennore Marine Refineries,"Ports, Maritime & Freight",Chennai-Ennore Logistics Corridor,6.91,8.75,77.28,18.9,13.0549,80.24628,6.1,High (Urban Floodplain),Medium
+KGL-DEF-2024-5013,Thane Bulk Chemical Storage,"Ports, Maritime & Freight",Chennai-Ennore Logistics Corridor,11.9,16.32,21.96,4.27,13.05929,80.26123,7.2,High (Urban Floodplain),Medium
+KGL-DEF-2024-5014,Kandla Portside Freight Yard,"Ports, Maritime & Freight",Punjab Agro-Industrial Basin,12.25,18.04,84.6,26.64,30.8683,75.88896,241.9,Moderate (Canal Overflow),High
+KGL-DEF-2024-5015,Bharuch Petro-Derivatives,Commercial Real Estate & Warehouses,Hyderabad Industrial & Tech Plateau,7.98,9.77,62.76,15.0,17.47371,78.52989,540.8,Low (Plateau),High
+KGL-DEF-2024-5016,Haldia Liquid Cargo Hub,"Ports, Maritime & Freight",Ahmedabad-Sanand Industrial Plain,43.89,62.88,89.59,38.99,23.10954,72.64738,47.2,Moderate (Monsoon Wash),Extreme
+KGL-DEF-2024-5017,Tirupur Export Weaving Units,Retail & Commercial SME,Bengaluru Electronic City Upland,13.03,20.5,43.78,14.66,13.03598,77.51568,921.8,Low (Inland Upland),Low
+KGL-DEF-2024-5018,Nashik Viticulture Logistics,Retail & Commercial SME,Surat-Tapi Delta Corridor,28.04,40.94,24.04,8.11,21.09326,72.82562,5.7,High (Riverine Delta),High
+KGL-DEF-2024-5019,Raigad Rolling Steel Mills,Commercial Real Estate & Warehouses,Mumbai-Thane Industrial & Coastal Basin,32.05,54.19,52.49,18.02,19.11804,72.90492,2.9,High (Coastal/Tidal),Medium
+KGL-DEF-2024-5020,Coimbatore Textile Infrastructure,Renewable & Thermal Energy,Chennai-Ennore Logistics Corridor,49.91,83.4,29.38,13.09,13.1357,80.30371,8.0,High (Urban Floodplain),Medium
+KGL-DEF-2024-5021,Godavari Agri Warehouse Corp,Agriculture & Agro-Processing,Mumbai-Thane Industrial & Coastal Basin,12.28,18.79,109.67,33.18,19.14937,72.80744,6.2,High (Coastal/Tidal),Medium
+KGL-DEF-2024-5022,Pune Heavy Robotics & Casting,Agriculture & Agro-Processing,Surat-Tapi Delta Corridor,8.92,11.99,57.31,10.9,21.17574,72.91862,3.0,High (Riverine Delta),High
+KGL-DEF-2024-5023,Ludhiana Tractor Equipments,Retail & Commercial SME,Hyderabad Industrial & Tech Plateau,47.81,79.35,73.63,14.39,17.43092,78.56513,540.3,Low (Plateau),High
+KGL-DEF-2024-5024,Bhiwandi E-Commerce Storage,Renewable & Thermal Energy,Ahmedabad-Sanand Industrial Plain,15.82,20.18,109.27,31.78,22.96206,72.56043,50.7,Moderate (Monsoon Wash),Extreme
+KGL-DEF-2024-5025,Mangalore Marine Chem Corp,Commercial Real Estate & Warehouses,Mumbai-Thane Industrial & Coastal Basin,21.27,28.33,49.57,8.01,19.12209,72.85522,3.2,High (Coastal/Tidal),Medium
+KGL-DEF-2024-5026,Sovereign Marine Freight Corp,Renewable & Thermal Energy,Punjab Agro-Industrial Basin,47.64,58.49,79.79,35.42,30.9319,75.78377,241.6,Moderate (Canal Overflow),High
+KGL-DEF-2024-5027,Bharat Heavy Electro-Chemicals,Renewable & Thermal Energy,Mumbai-Thane Industrial & Coastal Basin,6.13,7.74,19.56,3.27,19.16351,72.93804,5.9,High (Coastal/Tidal),Medium
+KGL-DEF-2024-5028,Narmada Agro Bio-Refineries,Agriculture & Agro-Processing,Bengaluru Electronic City Upland,16.51,24.73,53.74,21.3,13.03526,77.52946,919.7,Low (Inland Upland),Low
+KGL-DEF-2024-5029,Konkan Container & Logistics,Commercial Real Estate & Warehouses,Ahmedabad-Sanand Industrial Plain,8.29,12.15,59.15,24.11,23.06084,72.48333,49.8,Moderate (Monsoon Wash),Extreme
+KGL-DEF-2024-5030,Tapi Valley Textile Mills,"Ports, Maritime & Freight",Punjab Agro-Industrial Basin,29.52,46.83,45.33,11.76,30.94963,75.901,240.6,Moderate (Canal Overflow),High
+KGL-DEF-2024-5031,Coromandel Cold Storage Ltd,Heavy Manufacturing & Chemicals,Bengaluru Electronic City Upland,39.17,52.33,119.74,20.16,12.94383,77.5734,922.0,Low (Inland Upland),Low
+KGL-DEF-2024-5032,Ganga Delta Grain Silos,Retail & Commercial SME,Chennai-Ennore Logistics Corridor,26.44,37.26,71.57,27.18,13.02383,80.30574,6.0,High (Urban Floodplain),Medium
+KGL-DEF-2024-5033,Deccan Heavy Metallurgicals,Heavy Manufacturing & Chemicals,Surat-Tapi Delta Corridor,13.76,17.38,32.88,13.02,21.21016,72.83634,4.1,High (Riverine Delta),High
+KGL-DEF-2024-5034,Malabar Agro Products Trust,"Ports, Maritime & Freight",Chennai-Ennore Logistics Corridor,15.45,18.93,74.13,26.46,13.02649,80.26644,6.9,High (Urban Floodplain),Medium
+KGL-DEF-2024-5035,Sanand Precision Automotives,Commercial Real Estate & Warehouses,Ahmedabad-Sanand Industrial Plain,26.81,42.8,29.75,5.88,22.96334,72.62646,47.3,Moderate (Monsoon Wash),Extreme

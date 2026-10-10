@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>World Bank | Climate Stress Testing of Bank Loan Portfolios (FIN-01)</title>
+        <!-- Google Fonts: Inter (UI) + JetBrains Mono (Data) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <!-- Local Vendor Stylesheets & Scripts (100% Offline Resilient) -->
+        <link rel="stylesheet" href="/static/css/leaflet.css">
+        <link rel="stylesheet" href="/static/css/styles.css">
+        <script src="/static/js/tailwind.js">
+        </script>
+        <script src="/static/js/leaflet.js">
+        </script>
+        <script src="/static/js/chart.min.js">
+        </script>
+    </head>
+    <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+        <!-- Top Institutional Bank Header -->
+        <header class="bank-header-banner text-white px-6 py-3.5 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+                <!-- Left Branding -->
+                <div class="flex items-center gap-3.5">
+                    <!-- WB Logo Mark — SVG Chart Icon -->
+                    <div style="width:36px;height:36px;background:linear-gradient(145deg,#1a3a8f,#091428);border:1px solid rgba(99,130,210,0.3);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.4);">
+                        <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
+                            <polyline points="1,13 5,5 8.5,10 12,3 15.5,7 19,2" stroke="#60a5fa" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            <circle cx="5" cy="5" r="1.2" fill="#93c5fd"/>
+                            <circle cx="12" cy="3" r="1.2" fill="#93c5fd"/>
+                            <circle cx="19" cy="2" r="1.2" fill="#34d399"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5">
+                            <h1 style="font-size:12.5px;font-weight:700;letter-spacing:0.055em;text-transform:uppercase;color:#e2e8f0;font-family:'Inter',sans-serif;">World Bank Financial Stability Platform</h1>
+                            <span style="background:rgba(29,78,216,0.3);color:#93c5fd;border:1px solid rgba(59,130,246,0.35);font-size:9px;padding:1.5px 6px;border-radius:3px;font-weight:700;letter-spacing:0.12em;font-family:'JetBrains Mono',monospace;">FIN-01</span>
+                        </div>
+                        <p style="font-size:10px;color:#64748b;margin-top:2px;letter-spacing:0.01em;font-family:'Inter',sans-serif;">Portfolio-Wide Climate Stress-Testing &amp; Capital Adequacy Engine &nbsp;·&nbsp; Basel III / BCBS-239 / NGFS</p>
+                    </div>
+                </div>
+                <!-- Header Right Metadata & Actions -->
+                <div class="flex flex-wrap items-center gap-2.5 text-xs">
+                    <!-- Dataset Selector -->
+                    <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:5px 10px;border-radius:4px;">
+                        <span style="color:#475569;font-size:9.5px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;font-family:'Inter',sans-serif;">Dataset</span>
+                        <select id="active-dataset-select" style="background:transparent;color:#fbbf24;font-weight:600;font-size:11px;border:none;outline:none;cursor:pointer;font-family:'Inter',sans-serif;">
+                            <option value="world_bank" class="bg-slate-900 text-white">World Bank Commercial Portfolio (40 Facilities, $1.9B)</option>
+                            <option value="kaggle_loan" class="bg-slate-900 text-white">Kaggle — Loan Default Prediction (35 Facilities)</option>
+                            <option value="custom_uploaded" class="bg-slate-900 text-white">Custom Uploaded Portfolio</option>
+                        </select>
+                    </div>
+                    <!-- Clock -->
+                    <div class="hidden xl:flex flex-col text-right border-l border-slate-800 pl-3" style="line-height:1.3;">
+                        <span style="font-size:9px;text-transform:uppercase;letter-spacing:0.07em;color:#475569;font-weight:600;font-family:'Inter',sans-serif;">Live UTC</span>
+                        <span id="header-clock" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#94a3b8;">--:--:-- UTC</span>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-1.5">
+                        <button id="btn-board-briefing" style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#cbd5e1;padding:5px 11px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.11)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M9 9h6M9 12h6M9 15h4"/>
+                            </svg> Board Briefing</button>
+                            <button id="btn-export-csv" style="display:flex;align-items:center;gap:5px;background:#1557b0;border:1px solid rgba(37,99,235,0.45);color:#fff;padding:5px 11px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;" onmouseover="this.style.background='#1a6dd4'" onmouseout="this.style.background='#1557b0'">
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg> Export CSV</button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+    <!-- App Layout Wrapper: Sidebar + Content -->
+    <div class="app-layout">
+
+        <!-- ═══ Left Sidebar Navigation ═══ -->
+        <aside class="bank-sidebar">
+
+            <!-- System Badge -->
+            <div class="sidebar-sys-badge">
+                <div class="sidebar-sys-name">FIN-01 &nbsp;·&nbsp; v2.4.1</div>
+                <div class="sidebar-sys-sub">World Bank Risk Engine</div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+
+                <div class="sidebar-group-label">Analytics</div>
+
+                <button class="sidebar-nav-item tab-btn active" data-tab="dashboard">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="8" rx="1"/>
+                        <rect x="14" y="3" width="7" height="5" rx="1"/>
+                        <rect x="14" y="12" width="7" height="9" rx="1"/>
+                        <rect x="3" y="15" width="7" height="6" rx="1"/>
+                    </svg>
+                    <span>Risk &amp; Capital Dashboard</span>
+                </button>
+
+                <button class="sidebar-nav-item tab-btn" data-tab="scenarios">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
+                        <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
+                        <line x1="1" y1="14" x2="7" y2="14"/>
+                        <line x1="9" y1="8" x2="15" y2="8"/>
+                        <line x1="17" y1="16" x2="23" y2="16"/>
+                    </svg>
+                    <span>Scenario Comparison</span>
+                </button>
+
+                <button class="sidebar-nav-item tab-btn" data-tab="supply-chain">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="4" r="2"/>
+                        <circle cx="4" cy="20" r="2"/>
+                        <circle cx="20" cy="20" r="2"/>
+                        <line x1="12" y1="6" x2="12" y2="11"/>
+                        <line x1="12" y1="11" x2="4" y2="18"/>
+                        <line x1="12" y1="11" x2="20" y2="18"/>
+                    </svg>
+                    <span>Supply Chain Contagion</span>
+                </button>
+
+                <button class="sidebar-nav-item tab-btn" data-tab="horizons">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    <span>Multi-Year Horizons</span>
+                </button>
+
+                <div class="sidebar-group-label" style="margin-top:8px;">Data</div>
+
+                <button class="sidebar-nav-item tab-btn" data-tab="data-manager">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                    </svg>
+                    <span>Data Manager &amp; CSV</span>
+                </button>
+
+                <button class="sidebar-nav-item tab-btn" data-tab="onboarding">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <span>Facility Onboarding</span>
+                </button>
+
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-status-dot"></div>
+                <div>
+                    <div class="sidebar-status-label">Engine Online &nbsp;·&nbsp; Basel III Compliant</div>
+                    <div class="sidebar-status-sub">BCBS-239 &nbsp;/&nbsp; NGFS Scenarios Active</div>
+                </div>
+            </div>
+
+        </aside>
+        <!-- ═══ End Sidebar ═══ -->
+
+
+                
+                <!-- Main Container -->
+                <main class="app-main-content">
+                    <!-- ==================== TAB 1: MAIN RISK DASHBOARD ==================== -->
+                    <div id="tab-dashboard" class="tab-pane space-y-5">
+                        <!-- Macro-Climate Scenario Controller -->
+                        <section class="bank-card p-4 sm:p-5">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-3.5 mb-3.5 border-b border-slate-200 gap-3">
+                                <div>
+                                    <h2 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-blue-700">
+                                        </span> Macro-Climate Stress Scenario Controller</h2>
+                                        <p id="preset-desc" class="text-xs text-slate-600 mt-0.5">Select an institutional NGFS preset or adjust climate hazard parameters to simulate balance-sheet impacts.</p>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2.5">
+                                        <label class="text-xs font-semibold text-slate-700">NGFS Preset:</label>
+                                        <select id="scenario-preset" class="bg-white border border-slate-300 text-slate-800 text-xs rounded px-2.5 py-1.5 font-medium shadow-xs outline-none">
+                                            <option value="baseline">Baseline (Historical Norm)</option>
+                                            <option value="ngfs_orderly">NGFS Orderly Net-Zero (+1.5°C)</option>
+                                            <option value="ngfs_disorderly" selected>NGFS Disorderly (+2.0°C Delayed Shock)</option>
+                                            <option value="ngfs_hothouse">NGFS Hot House World (+3.5°C Catastrophic)</option>
+                                            <option value="custom">Custom Parameters</option>
+                                        </select>
+                                        <button id="btn-reset-baseline" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-1.5 rounded text-xs font-semibold shadow-xs transition">Reset Baseline</button>
+                                        <button id="btn-run-simulation" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded text-xs font-semibold shadow-xs transition flex items-center gap-1.5">Re-Calculate Risk</button>
+                                        <button id="btn-open-reverse-stress" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded text-xs font-semibold shadow-xs transition flex items-center gap-1">Reverse Stress Test</button>
+                                        <button id="btn-open-certificate" class="bg-blue-800 hover:bg-blue-900 text-white px-3 py-1.5 rounded text-xs font-semibold shadow-xs transition flex items-center gap-1">BCBS-239 Certificate</button>
+                                    </div>
+                                </div>
+                                <!-- Sliders -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="font-semibold text-slate-700">Flood Inundation Index</span>
+                                            <span id="val-flood_severity" class="num-mono font-bold text-blue-800">50% Severity</span>
+                                        </div>
+                                        <input type="range" id="slider-flood_severity" min="0" max="1" step="0.05" value="0.50" class="w-full">
+                                        <span class="text-[10px] text-slate-500 block">World Bank 100-Yr flood hazard intensity</span>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="font-semibold text-slate-700">Extreme Heatwave Days</span>
+                                            <span id="val-heat_days" class="num-mono font-bold text-blue-800">35 Days</span>
+                                        </div>
+                                        <input type="range" id="slider-heat_days" min="0" max="60" step="1" value="35" class="w-full">
+                                        <span class="text-[10px] text-slate-500 block">Sustained days exceeding 42°C threshold</span>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="font-semibold text-slate-700">Transition Carbon Tax</span>
+                                            <span id="val-carbon_tax_shock" class="num-mono font-bold text-blue-800">20% Cost Shock</span>
+                                        </div>
+                                        <input type="range" id="slider-carbon_tax_shock" min="0" max="0.50" step="0.05" value="0.20" class="w-full">
+                                        <span class="text-[10px] text-slate-500 block">Gross revenue impairment from carbon penalization</span>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="font-semibold text-slate-700">Supply Chain Spillover</span>
+                                            <span id="val-cascade_multiplier" class="num-mono font-bold text-blue-800">1.18x Spillover</span>
+                                        </div>
+                                        <input type="range" id="slider-cascade_multiplier" min="1.0" max="1.50" step="0.02" value="1.18" class="w-full">
+                                        <span class="text-[10px] text-slate-500 block">Input-output intersectoral contagion factor</span>
+                                    </div>
+                                </div>
+                            </section>
+                            <!-- Executive KPI Banking Risk Cards -->
+                            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                                <div class="bank-card p-4">
+                                    <div class="kpi-metric-title">Portfolio Exposure (EAD)</div>
+                                    <div id="kpi-total-ead" class="kpi-metric-value mt-1">$1,913.9M</div>
+                                    <div class="text-[11px] text-slate-600 mt-1 flex items-center justify-between">
+                                        <span>Evaluated Facilities</span>
+                                        <span class="font-mono font-semibold">Active Book</span>
+                                    </div>
+                                </div>
+                                <div class="bank-card p-4 border-l-4 border-l-rose-600">
+                                    <div class="kpi-metric-title">Stressed Expected Loss (EL)</div>
+                                    <div id="kpi-stressed-el" class="kpi-metric-value mt-1 text-rose-700">$48.77M</div>
+                                    <div class="mt-1 flex items-center justify-between">
+                                        <span id="kpi-el-surge-badge" class="badge-reg badge-critical font-mono font-bold">+184.2%</span>
+                                        <span class="text-[10px] text-slate-600">Base: <span id="kpi-base-el" class="font-mono">$13.5M</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="bank-card p-4">
+                                <div class="kpi-metric-title">Capital Adequacy (CAR)</div>
+                                <div id="kpi-stressed-car" class="kpi-metric-value mt-1">11.69%</div>
+                                <div class="mt-1 flex items-center justify-between">
+                                    <span id="kpi-car-status-badge" class="badge-reg badge-stable">BASEL III COMPLIANT</span>
+                                    <span id="kpi-car-depletion" class="text-[10px] text-slate-600 font-mono">-308 bps</span>
+                                </div>
+                            </div>
+                            <div class="bank-card p-4">
+                                <div class="kpi-metric-title">Credit VaR (99.9% Conf.)</div>
+                                <div id="kpi-var-99" class="kpi-metric-value mt-1">$136.5M</div>
+                                <div class="text-[11px] text-slate-600 mt-1 flex items-center justify-between">
+                                    <span>Audit Hash</span>
+                                    <span id="kpi-audit-hash-badge" class="font-mono font-semibold text-[10px] text-blue-800">WB-AUDIT</span>
+                                </div>
+                            </div>
+                            <div class="bank-card p-4">
+                                <div class="kpi-metric-title">Borrower Risk Tiers</div>
+                                <div class="mt-2 flex items-center justify-between gap-1">
+                                    <div class="text-center flex-1 bg-rose-50 border border-rose-200 rounded py-1">
+                                        <div id="kpi-critical-loans" class="num-mono font-bold text-rose-700 text-sm">26</div>
+                                        <div class="text-[9px] font-semibold text-rose-600 uppercase">Critical</div>
+                                    </div>
+                                    <div class="text-center flex-1 bg-amber-50 border border-amber-200 rounded py-1">
+                                        <div id="kpi-elevated-loans" class="num-mono font-bold text-amber-700 text-sm">10</div>
+                                        <div class="text-[9px] font-semibold text-amber-600 uppercase">Elevated</div>
+                                    </div>
+                                    <div class="text-center flex-1 bg-emerald-50 border border-emerald-200 rounded py-1">
+                                        <div id="kpi-stable-loans" class="num-mono font-bold text-emerald-700 text-sm">4</div>
+                                        <div class="text-[9px] font-semibold text-emerald-600 uppercase">Stable</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- Geospatial Risk Map & Credit Breakdown Grid -->
+                        <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                            <!-- Left: Geospatial Collateral Map (7 Cols) -->
+                            <div class="lg:col-span-7 space-y-5">
+                                <div class="bank-card flex flex-col h-[480px]">
+                                    <div class="bank-card-header flex flex-wrap items-center justify-between gap-2.5">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wide">Geospatial Collateral Hazard Map</span>
+                                            <span class="text-[11px] text-slate-600 hidden sm:inline">• Live Geocoded Facilities</span>
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                                            <!-- Street vs Satellite Layer Toggle -->
+                                            <div class="inline-flex rounded border border-slate-300 overflow-hidden text-[10px] font-semibold bg-white shadow-xs">
+                                                <button id="btn-map-street" type="button" class="px-2 py-0.5 bg-slate-900 text-white transition">️ Street</button>
+                                                <button id="btn-map-sat" type="button" class="px-2 py-0.5 bg-white text-slate-700 hover:bg-slate-100 transition">️ Satellite</button>
+                                            </div>
+                                            <!-- Corridor Filter -->
+                                            <select id="map-filter-corridor" class="bg-white border border-slate-300 text-slate-800 text-[11px] rounded px-2 py-0.5 font-medium outline-none shadow-xs">
+                                                <option value="ALL">All Economic Corridors</option>
+                                            </select>
+                                            <!-- Sector Filter -->
+                                            <select id="map-filter-sector" class="bg-white border border-slate-300 text-slate-800 text-[11px] rounded px-2 py-0.5 font-medium outline-none shadow-xs">
+                                                <option value="ALL">All Sectors</option>
+                                            </select>
+                                            <!-- World Bank Flood Hazard Grid Checkbox -->
+                                            <label class="flex items-center gap-1 cursor-pointer text-slate-700 font-medium text-[11px]">
+                                                <input type="checkbox" id="toggle-hazard-layer" checked class="rounded border-slate-300 text-blue-600 focus:ring-0">
+                                                <span>WB Flood (RP100)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- 3D Elevation & Water Surge Inundation Bar -->
+                                    <div class="bg-blue-50/80 border-b border-blue-200 px-3.5 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-blue-950 flex items-center gap-1 text-[11px] uppercase tracking-wide"> 🌊 3D Elevation & Surge Inundation:                                 </span>
+                                            <span id="map-inundation-badge" class="px-2 py-0.5 rounded bg-blue-200 text-blue-950 font-mono text-[10px] font-bold"> 0 Submerged (+0.0m Surge)                                 </span>
+                                        </div>
+                                        <div class="flex items-center gap-2.5">
+                                            <label class="text-[11px] text-slate-700 font-semibold flex items-center gap-1.5">
+                                                <span>Surge Height:</span>
+                                                <input type="range" id="slider-map-surge" min="0" max="5.0" step="0.5" value="0.0" class="w-24 sm:w-32 accent-blue-700">
+                                                <span id="val-map-surge" class="font-mono font-bold text-blue-900 min-w-[36px]">+0.0m</span>
+                                            </label>
+                                            <span id="map-submerged-ead" class="font-mono text-[11px] text-rose-700 font-bold hidden sm:inline">$0.0M at Risk</span>
+                                        </div>
+                                    </div>
+                                    <div id="risk-map" class="w-full relative z-0" style="height: 400px; min-height: 400px;">
+                                    </div>
+                                    <div class="bg-slate-50 border-t border-slate-200 px-4 py-2 flex flex-wrap items-center justify-between text-[11px] text-slate-600">
+                                        <div class="flex flex-wrap items-center gap-3">
+                                            <span class="flex items-center gap-1.5">
+                                                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block">
+                                                </span> Stable</span>
+                                                <span class="flex items-center gap-1.5">
+                                                    <span class="w-3 h-3 rounded-full bg-amber-500 inline-block">
+                                                    </span> Elevated</span>
+                                                    <span class="flex items-center gap-1.5">
+                                                        <span class="w-3 h-3 rounded-full bg-rose-600 inline-block">
+                                                        </span> Critical</span>
+                                                        <span class="flex items-center gap-1.5">
+                                                            <span class="w-3 h-3 rounded-full bg-blue-600 ring-2 ring-blue-300 inline-block">
+                                                            </span> Submerged (&lt; Surge)</span>
+                                                        </div>
+                                                        <span class="text-slate-500 italic">Click pin for facility dossier & live satellite feed</span>
+                                                    </div>
+                                                </div>
+                                                <!-- Sector Chart -->
+                                                <div class="bank-card p-4">
+                                                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                                        <span class="text-xs font-bold text-slate-800 uppercase tracking-wide">Sector Expected Loss Concentration</span>
+                                                        <span class="text-[11px] text-slate-500">Baseline vs Stressed Comparison</span>
+                                                    </div>
+                                                    <div class="h-64 mt-3">
+                                                        <canvas id="sector-risk-chart">
+                                                        </canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Right: Rating Migration & Risk Transmission (5 Cols) -->
+                                            <div class="lg:col-span-5 space-y-5">
+                                                <!-- IFRS 9 Expected Credit Loss Staging Card -->
+                                                <div class="bank-card p-4 space-y-3">
+                                                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                                        <div>
+                                                            <span class="text-xs font-bold text-slate-800 uppercase tracking-wide">IFRS 9 Expected Credit Loss Staging</span>
+                                                            <span class="text-[10px] text-slate-500 block">Ind-AS 109 / IFRS 9 Capital Provisioning</span>
+                                                        </div>
+                                                        <span id="ifrs9-total-provision-badge" class="font-mono font-bold text-xs text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">$0.00M Required</span>
+                                                    </div>
+                                                    <div class="space-y-2 text-xs">
+                                                        <!-- Stage 1 -->
+                                                        <div class="p-2 rounded bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                                                            <div>
+                                                                <b class="text-emerald-900">Stage 1: Performing (12M ECL)</b>
+                                                                <span id="ifrs9-stage1-sub" class="text-[10px] text-emerald-700 block mt-0.5">0 Facilities • $0M EAD</span>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                <span id="ifrs9-stage1-prov" class="font-mono font-bold text-emerald-900">$0.00M</span>
+                                                                <span class="text-[9px] text-emerald-600 block">Provision</span>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Stage 2 -->
+                                                        <div class="p-2 rounded bg-amber-50 border border-amber-200 flex items-center justify-between">
+                                                            <div>
+                                                                <b class="text-amber-900">Stage 2: Underperforming / SICR</b>
+                                                                <span id="ifrs9-stage2-sub" class="text-[10px] text-amber-700 block mt-0.5">0 Facilities • Lifetime ECL</span>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                <span id="ifrs9-stage2-prov" class="font-mono font-bold text-amber-900">$0.00M</span>
+                                                                <span class="text-[9px] text-amber-600 block">Provision</span>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Stage 3 -->
+                                                        <div class="p-2 rounded bg-rose-50 border border-rose-200 flex items-center justify-between">
+                                                            <div>
+                                                                <b class="text-rose-900">Stage 3: Credit Impaired / NPL</b>
+                                                                <span id="ifrs9-stage3-sub" class="text-[10px] text-rose-700 block mt-0.5">0 Facilities • Severe Physical Damage</span>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                <span id="ifrs9-stage3-prov" class="font-mono font-bold text-rose-900">$0.00M</span>
+                                                                <span class="text-[9px] text-rose-600 block">Provision</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Staging Breakdown Distribution Bar -->
+                                                    <div class="pt-1">
+                                                        <div class="flex justify-between text-[10px] text-slate-500 mb-1">
+                                                            <span>Portfolio Quality Distribution</span>
+                                                            <span id="ifrs9-migration-pct" class="font-semibold text-rose-700">0% Distressed</span>
+                                                        </div>
+                                                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden flex">
+                                                            <div id="ifrs9-bar-stage1" class="bg-emerald-500 h-full transition-all duration-300" style="width: 50%;">
+                                                            </div>
+                                                            <div id="ifrs9-bar-stage2" class="bg-amber-500 h-full transition-all duration-300" style="width: 30%;">
+                                                            </div>
+                                                            <div id="ifrs9-bar-stage3" class="bg-rose-600 h-full transition-all duration-300" style="width: 20%;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Rating Migration Matrix -->
+                                                <div class="bank-card">
+                                                    <div class="bank-card-header">
+                                                        <span class="text-xs font-bold text-slate-800 uppercase tracking-wide">Credit Rating Migration Matrix</span>
+                                                        <span class="badge-reg badge-neutral">Basel PD Mapping</span>
+                                                    </div>
+                                                    <div class="p-3" id="rating-matrix-container">
+                                                        <!-- Populated by JavaScript -->
+                                                    </div>
+                                                </div>
+                                                <!-- Transmission Channel Diagram -->
+                                                <div class="bank-card p-4 space-y-3">
+                                                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                                        <span class="text-xs font-bold text-slate-800 uppercase tracking-wide">Climate Risk Transmission Mechanics</span>
+                                                        <span class="text-[10px] text-slate-500 font-mono">NGFS Framework</span>
+                                                    </div>
+                                                    <div class="space-y-2 text-xs">
+                                                        <div class="p-2.5 rounded bg-slate-50 border border-slate-200 flex items-start gap-2.5">
+                                                            <span class="font-bold font-mono text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded text-[10px]">01</span>
+                                                            <div>
+                                                                <b class="text-slate-800">Physical Asset Impairment</b>
+                                                                <p class="text-slate-600 text-[11px] mt-0.5">Flooding & extreme heat degrade physical structures and machines based on elevation & insurance.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="p-2.5 rounded bg-slate-50 border border-slate-200 flex items-start gap-2.5">
+                                                            <span class="font-bold font-mono text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded text-[10px]">02</span>
+                                                            <div>
+                                                                <b class="text-slate-800">Cash Flow & Income Disruption</b>
+                                                                <p class="text-slate-600 text-[11px] mt-0.5">Facility shutdowns and carbon costs slash operating EBITDA, elevating Probability of Default (PD).</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="p-2.5 rounded bg-slate-50 border border-slate-200 flex items-start gap-2.5">
+                                                            <span class="font-bold font-mono text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded text-[10px]">03</span>
+                                                            <div>
+                                                                <b class="text-slate-800">Cascading Supply Chain Spillover</b>
+                                                                <p class="text-slate-600 text-[11px] mt-0.5">Supplier defaults propagate contagion to downstream retail and logistics borrowers.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="p-2.5 rounded bg-rose-50 border border-rose-200 flex items-start gap-2.5">
+                                                            <span class="font-bold font-mono text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded text-[10px]">04</span>
+                                                            <div>
+                                                                <b class="text-rose-900">Capital Adequacy & Balance Sheet Depletion</b>
+                                                                <p class="text-rose-800 text-[11px] mt-0.5">Expected losses deplete Tier 1 capital; RWA expands from rating downgrades, stressing regulatory CAR.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                        <!-- Loan Portfolio Audit Table Section -->
+                                        <section class="bank-card">
+                                            <div class="bank-card-header flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div>
+                                                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide">Loan Portfolio Audit & Stress Assessment</h3>
+                                                    <p id="table-record-count" class="text-[11px] text-slate-500 mt-0.5">Loading facility data...</p>
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <input type="text" id="table-search" placeholder="Search borrower / corridor..." class="bg-white border border-slate-300 text-xs rounded px-2.5 py-1 text-slate-800 outline-none w-48 shadow-xs">
+                                                    <select id="table-sector-filter" class="bg-white border border-slate-300 text-xs rounded px-2 py-1 text-slate-800 outline-none shadow-xs">
+                                                        <option value="ALL">All Sectors</option>
+                                                        <option value="Heavy Manufacturing & Chemicals">Manufacturing</option>
+                                                        <option value="Commercial Real Estate & Warehouses">Real Estate & Warehouses</option>
+                                                        <option value="Agriculture & Agro-Processing">Agriculture</option>
+                                                        <option value="Renewable & Thermal Energy">Energy</option>
+                                                        <option value="Ports, Maritime & Freight">Maritime & Ports</option>
+                                                        <option value="Retail & Commercial SME">Retail & SME</option>
+                                                    </select>
+                                                    <select id="table-risk-filter" class="bg-white border border-slate-300 text-xs rounded px-2 py-1 text-slate-800 outline-none shadow-xs">
+                                                        <option value="ALL">All Risk Tiers</option>
+                                                        <option value="CRITICAL">Critical Only</option>
+                                                        <option value="ELEVATED">Elevated Only</option>
+                                                        <option value="STABLE">Stable Only</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="overflow-x-auto max-h-[460px]">
+                                                <table class="bank-table">
+                                                    <thead class="sticky top-0 z-10 shadow-xs">
+                                                        <tr>
+                                                            <th>Facility ID</th>
+                                                            <th>Borrower Name</th>
+                                                            <th>Sector</th>
+                                                            <th>Corridor</th>
+                                                            <th class="text-right">EAD ($M)</th>
+                                                            <th class="text-center">Rating</th>
+                                                            <th class="text-right">Stressed PD</th>
+                                                            <th class="text-right">Stressed LGD</th>
+                                                            <th class="text-right">Stressed EL</th>
+                                                            <th class="text-right">Physical Dmg</th>
+                                                            <th class="text-center">Risk Tier</th>
+                                                            <th class="text-right">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="portfolio-table-body">
+                                                        <!-- Populated dynamically by app.js -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <!-- ==================== TAB 2: SCENARIO COMPARISON STUDIO ==================== -->
+                                    <div id="tab-scenarios" class="tab-pane hidden space-y-5">
+                                        <div class="bank-card p-5">
+                                            <div class="pb-3 mb-4 border-b border-slate-200">
+                                                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                                    <span class="w-2 h-2 rounded-full bg-blue-700">
+                                                    </span> NGFS Multi-Scenario Side-by-Side Comparison Studio</h2>
+                                                    <p class="text-xs text-slate-600 mt-0.5">Direct comparative matrix evaluating bank capital ratios across all 4 Network for Greening the Financial System (NGFS) pathways simultaneously.</p>
+                                                </div>
+                                                <div class="overflow-x-auto">
+                                                    <table class="w-full text-xs border border-slate-200 rounded">
+                                                        <thead class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                                                            <tr>
+                                                                <th class="p-3 text-left font-bold">Climate Scenario</th>
+                                                                <th class="p-3 text-right font-bold">Stressed Expected Loss</th>
+                                                                <th class="p-3 text-right font-bold">Loss Surge (%)</th>
+                                                                <th class="p-3 text-right font-bold">Capital Adequacy (CAR)</th>
+                                                                <th class="p-3 text-right font-bold">CAR Buffer Depletion</th>
+                                                                <th class="p-3 text-center font-bold">Critical Facilities</th>
+                                                                <th class="p-3 text-center font-bold">Basel III Compliance</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="scenarios-table-body">
+                                                            <!-- Dynamic Content -->
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="h-72 mt-6">
+                                                    <canvas id="scenario-compare-chart">
+                                                    </canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- ==================== TAB 3: SUPPLY CHAIN CONTAGION ==================== -->
+                                        <div id="tab-supply-chain" class="tab-pane hidden space-y-5">
+                                            <div class="bank-card p-5">
+                                                <div class="pb-3 mb-4 border-b border-slate-200">
+                                                    <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                                        <span class="w-2 h-2 rounded-full bg-purple-700">
+                                                        </span> Intersectoral Supply Chain Contagion Engine (Leontief Input-Output)</h2>
+                                                        <p class="text-xs text-slate-600 mt-0.5">Captures cascading credit contagion: when primary upstream sectors (ports, heavy chemicals, energy) suffer physical climate shocks, secondary defaults propagate into downstream commercial and retail sectors.</p>
+                                                    </div>
+                                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                        <div>
+                                                            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-2.5">Sector Stress Status Nodes</h4>
+                                                            <div id="contagion-nodes-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                                <!-- Populated dynamically -->
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide mb-2.5">Directed Contagion Transmission Arcs</h4>
+                                                            <div id="contagion-edges-list" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                                                                <!-- Populated dynamically -->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- ==================== TAB 4: MULTI-YEAR HORIZONS ==================== -->
+                                            <div id="tab-horizons" class="tab-pane hidden space-y-5">
+                                                <div class="bank-card p-5">
+                                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-slate-200 gap-3">
+                                                        <div>
+                                                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                                                <span class="w-2 h-2 rounded-full bg-amber-700">
+                                                                </span> Multi-Year Climate Horizon Capital Erosion Projections (2026–2050)</h2>
+                                                                <p class="text-xs text-slate-600 mt-0.5">Simulate compounding balance-sheet degradation over 5, 10, 15, and 25-year loan facility tenors under IPCC Shared Socioeconomic Pathways.</p>
+                                                            </div>
+                                                            <div class="flex items-center gap-2">
+                                                                <label class="text-xs font-semibold text-slate-700">IPCC Pathway:</label>
+                                                                <select id="horizon-pathway-select" onchange="loadTimeHorizon()" class="bg-white border border-slate-300 text-xs rounded px-2.5 py-1.5 font-medium outline-none">
+                                                                    <option value="SSP1-2.6 (Orderly Net-Zero)">SSP1-2.6 (Orderly Net-Zero)</option>
+                                                                    <option value="SSP2-4.5 (Middle of the Road)" selected>SSP2-4.5 (Middle of the Road)</option>
+                                                                    <option value="SSP5-8.5 (High Emissions / Runaway)">SSP5-8.5 (High Emissions / Runaway)</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="h-64 mb-5">
+                                                            <canvas id="horizon-trajectory-chart">
+                                                            </canvas>
+                                                        </div>
+                                                        <div class="overflow-x-auto">
+                                                            <table class="w-full text-xs border border-slate-200 rounded">
+                                                                <thead class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                                                                    <tr>
+                                                                        <th class="p-3 text-left font-bold">Horizon Year</th>
+                                                                        <th class="p-3 text-right font-bold">Stressed Expected Loss</th>
+                                                                        <th class="p-3 text-right font-bold">Projected CAR (%)</th>
+                                                                        <th class="p-3 text-center font-bold">Critical Facilities</th>
+                                                                        <th class="p-3 text-right font-bold">Cumulative Damage Index</th>
+                                                                        <th class="p-3 text-center font-bold">Capital Adequacy Status</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="horizon-table-body">
+                                                                    <!-- Populated dynamically -->
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- ==================== TAB 5: DATA MANAGER & CSV UPLOAD ==================== -->
+                                                <div id="tab-data-manager" class="tab-pane hidden space-y-5">
+                                                    <div class="bank-card p-5">
+                                                        <div class="pb-3 mb-4 border-b border-slate-200">
+                                                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                                                <span class="w-2 h-2 rounded-full bg-blue-700">
+                                                                </span> Portfolio Data Manager & CSV Ingestion Engine</h2>
+                                                                <p class="text-xs text-slate-600 mt-0.5">Switch between verified datasets (World Bank Commercial Portfolio or Kaggle Loan Default dataset), or upload custom loan portfolios for instant stress evaluation.</p>
+                                                            </div>
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                                <!-- CSV Drag & Drop / Upload -->
+                                                                <div class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center bg-slate-50 flex flex-col items-center justify-center space-y-3">
+                                                                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold"> 📂                         </div>
+                                                                    <div>
+                                                                        <h4 class="text-xs font-bold text-slate-800 uppercase">Upload Custom Loan Portfolio (.CSV)</h4>
+                                                                        <p class="text-[11px] text-slate-500 mt-1 max-w-sm">Supports Kaggle Loan Default format or Bank Loan Portfolio CSV format with automatic coordinate extraction.</p>
+                                                                    </div>
+                                                                    <label class="cursor-pointer bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded text-xs font-semibold shadow-xs transition"> Browse CSV File                             <input type="file" id="csv-file-upload" accept=".csv" class="hidden">
+                                                                    </label>
+                                                                    <div id="upload-status-indicator" class="text-xs mt-2">
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Dataset Specifications & Download -->
+                                                                <div class="bg-white border border-slate-200 rounded p-4 space-y-3 text-xs">
+                                                                    <h4 class="font-bold text-slate-800 uppercase text-[11px]">Integrated Verified Datasets</h4>
+                                                                    <div class="p-2.5 rounded bg-slate-50 border border-slate-200">
+                                                                        <b>1. World Bank — Global Flood Exposure (Rentschler et al. 2022)</b>
+                                                                        <p class="text-[11px] text-slate-600 mt-0.5">Gridded 1-in-100 year inundation depths across 8 industrial and riverine delta economic corridors.</p>
+                                                                    </div>
+                                                                    <div class="p-2.5 rounded bg-slate-50 border border-slate-200">
+                                                                        <b>2. Kaggle — Loan Default Prediction (kmldas/loan-default-prediction)</b>
+                                                                        <p class="text-[11px] text-slate-600 mt-0.5">Loan balances, operating salaries/revenue, and baseline default scoring mapped to Basel III facility books.</p>
+                                                                    </div>
+                                                                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                                                                        <a href="/static/DEMO_UPLOAD.csv" download="DEMO_UPLOAD.csv" class="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-3 py-1.5 rounded transition shadow-xs">
+                                                                            <span>Download Live Presentation Demo CSV (10 Facilities)</span>
+                                                                        </a>
+                                                                        <a href="/static/sample_kaggle_loans.csv" download="sample_kaggle_loans.csv" class="inline-flex items-center gap-1.5 text-blue-700 hover:text-blue-900 font-semibold text-xs py-1.5">
+                                                                            <span>Sample Kaggle Dataset (35 Facilities)</span>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- ==================== TAB 6: FACILITY ONBOARDING ==================== -->
+                                                    <div id="tab-onboarding" class="tab-pane hidden space-y-5">
+                                                        <div class="bank-card p-5">
+                                                            <div class="pb-3 mb-4 border-b border-slate-200">
+                                                                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                                                    <span class="w-2 h-2 rounded-full bg-emerald-700">
+                                                                    </span> Commercial Loan Facility Onboarding & Immediate Stress Evaluation</h2>
+                                                                    <p class="text-xs text-slate-600 mt-0.5">Register a new borrower facility, specify collateral location coordinates and elevation, and immediately execute climate stress diagnostics.</p>
+                                                                </div>
+                                                                <form id="form-add-facility" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Borrower Corporate Entity</label>
+                                                                        <input type="text" id="onboard-borrower" required placeholder="e.g. Reliance Petro Logistics Ltd" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none">
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Sector Classification</label>
+                                                                        <select id="onboard-sector" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none">
+                                                                            <option>Heavy Manufacturing & Chemicals</option>
+                                                                            <option>Commercial Real Estate & Warehouses</option>
+                                                                            <option>Agriculture & Agro-Processing</option>
+                                                                            <option>Renewable & Thermal Energy</option>
+                                                                            <option>Ports, Maritime & Freight</option>
+                                                                            <option>Retail & Commercial SME</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Economic Corridor</label>
+                                                                        <select id="onboard-corridor" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none">
+                                                                            <option>Mumbai-Thane Industrial & Coastal Basin</option>
+                                                                            <option>Surat-Tapi Delta Corridor</option>
+                                                                            <option>Kolkata-Hooghly Estuary Basin</option>
+                                                                            <option>Chennai-Ennore Logistics Corridor</option>
+                                                                            <option>Ahmedabad-Sanand Industrial Plain</option>
+                                                                            <option>Punjab Agro-Industrial Basin</option>
+                                                                            <option>Hyderabad Industrial & Tech Plateau</option>
+                                                                            <option>Bengaluru Electronic City Upland</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Facility Exposure EAD ($M)</label>
+                                                                        <input type="number" id="onboard-ead" step="0.1" required value="25.0" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none font-mono">
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Collateral Baseline Valuation ($M)</label>
+                                                                        <input type="number" id="onboard-collateral-val" step="0.1" required value="35.0" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none font-mono">
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Collateral Type</label>
+                                                                        <input type="text" id="onboard-collateral-type" required value="Industrial Plant & Warehouse" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none">
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Latitude (GPS)</label>
+                                                                        <input type="number" id="onboard-lat" step="0.0001" required value="19.1250" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none font-mono">
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Longitude (GPS)</label>
+                                                                        <input type="number" id="onboard-lng" step="0.0001" required value="72.9100" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none font-mono">
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Elevation Above Sea Level (Meters)</label>
+                                                                        <input type="number" id="onboard-elevation" step="0.1" required value="4.5" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none font-mono">
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Flood Hazard Zone</label>
+                                                                        <select id="onboard-flood-zone" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none">
+                                                                            <option>High (Coastal/Tidal)</option>
+                                                                            <option>High (Riverine Delta)</option>
+                                                                            <option>Moderate (Wash/Canal)</option>
+                                                                            <option>Low (Upland)</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="block font-semibold text-slate-700 mb-1">Heat Hazard Zone</label>
+                                                                        <select id="onboard-heat-zone" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 outline-none">
+                                                                            <option>Extreme</option>
+                                                                            <option selected>High</option>
+                                                                            <option>Medium</option>
+                                                                            <option>Low</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="flex items-end">
+                                                                        <button type="submit" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded text-xs transition shadow-xs">Register & Stress Test Facility</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        </main>
+    </div><!-- /.app-layout -->
+                                                        <!-- Footer -->
+                                                        <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 px-6 py-4 mt-8 text-xs">
+                                                            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+                                                                <span>© World Bank Group • Climate Risk Assessment Platform (FIN-01)</span>
+                                                                <span class="font-mono text-slate-400">Basel III / BCBS 239 Compliant • Multi-Hazard Stress Engine v2.0</span>
+                                                            </div>
+                                                        </footer>
+                                                        <!-- ==================== BORROWER CREDIT DOSSIER MODAL ==================== -->
+                                                        <div id="borrower-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bank-modal-overlay hidden">
+                                                            <div class="bg-white rounded-lg shadow-2xl border border-slate-300 max-w-2xl w-full overflow-hidden">
+                                                                <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+                                                                    <div>
+                                                                        <h3 id="modal-borrower-name" class="font-bold text-sm tracking-wide">Apex Global Logistics Ltd</h3>
+                                                                        <p id="modal-loan-id" class="text-xs text-slate-300 font-mono mt-0.5">Facility Reference: WB-CR-2024-1001</p>
+                                                                    </div>
+                                                                    <div class="flex items-center gap-2">
+                                                                        <button onclick="printSingleBorrowerMemo()" class="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-semibold shadow-xs flex items-center gap-1.5 transition">️ Print Single Facility Risk Memo</button>
+                                                                        <button onclick="closeBorrowerModal()" class="text-slate-400 hover:text-white text-lg font-bold p-1">
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="p-5 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+                                                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded border border-slate-200">
+                                                                        <div>
+                                                                            <span class="text-slate-500 block">Sector</span>
+                                                                            <b id="modal-sector" class="text-slate-800">Commercial Real Estate</b>
+                                                                        </div>
+                                                                        <div>
+                                                                            <span class="text-slate-500 block">Corridor</span>
+                                                                            <b id="modal-corridor" class="text-slate-800">Mumbai-Thane Industrial Belt</b>
+                                                                        </div>
+                                                                        <div>
+                                                                            <span class="text-slate-500 block">Collateral Type</span>
+                                                                            <b id="modal-collateral-type" class="text-slate-800">Logistics Park</b>
+                                                                        </div>
+                                                                        <div>
+                                                                            <span class="text-slate-500 block">Facility EAD</span>
+                                                                            <b id="modal-ead" class="font-mono text-slate-900">$24.5M</b>
+                                                                        </div>
+                                                                        <div>
+                                                                            <span class="text-slate-500 block">Baseline Collateral</span>
+                                                                            <b id="modal-collateral-base" class="font-mono text-slate-900">$32.0M</b>
+                                                                        </div>
+                                                                        <div>
+                                                                            <span class="text-slate-500 block">Stressed Collateral</span>
+                                                                            <b id="modal-collateral-stressed" class="font-mono text-rose-700 font-bold">$21.4M</b>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="border border-slate-200 rounded p-3 space-y-2">
+                                                                        <span class="font-bold text-slate-800 uppercase tracking-wide block text-[11px]">Climate Physical Hazard Diagnostics</span>
+                                                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                                                                            <div class="p-2 bg-slate-50 rounded">
+                                                                                <span class="text-slate-500 block text-[10px]">Flood Zone</span>
+                                                                                <b id="modal-flood-zone" class="text-slate-800 text-[11px]">High (Coastal)</b>
+                                                                            </div>
+                                                                            <div class="p-2 bg-slate-50 rounded">
+                                                                                <span class="text-slate-500 block text-[10px]">Heat Hazard</span>
+                                                                                <b id="modal-heat-zone" class="text-slate-800 text-[11px]">Medium</b>
+                                                                            </div>
+                                                                            <div class="p-2 bg-rose-50 rounded">
+                                                                                <span class="text-rose-700 block text-[10px]">Physical Damage</span>
+                                                                                <b id="modal-physical-damage" class="font-mono text-rose-800 text-[12px] font-bold">34.2%</b>
+                                                                            </div>
+                                                                            <div class="p-2 bg-amber-50 rounded">
+                                                                                <span class="text-amber-700 block text-[10px]">Revenue Shock</span>
+                                                                                <b id="modal-revenue-shock" class="font-mono text-amber-800 text-[12px] font-bold">-28.5%</b>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="border border-slate-200 rounded p-3 space-y-2">
+                                                                        <span class="font-bold text-slate-800 uppercase tracking-wide block text-[11px]">Basel III Credit Risk Migration</span>
+                                                                        <div class="grid grid-cols-3 gap-2">
+                                                                            <div class="p-2 bg-slate-50 rounded">
+                                                                                <span class="text-slate-500 block text-[10px]">Rating Migration</span>
+                                                                                <div class="font-mono font-bold mt-1 text-slate-900">
+                                                                                    <span id="modal-base-rating">A</span> → <span id="modal-stressed-rating" class="text-rose-700">BBB</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="p-2 bg-slate-50 rounded">
+                                                                                <span class="text-slate-500 block text-[10px]">PD Shift</span>
+                                                                                <div class="font-mono font-bold mt-1 text-slate-900">
+                                                                                    <span id="modal-base-pd">1.2%</span> → <span id="modal-stressed-pd" class="text-rose-700">4.8%</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="p-2 bg-slate-50 rounded">
+                                                                                <span class="text-slate-500 block text-[10px]">LGD Shift</span>
+                                                                                <div class="font-mono font-bold mt-1 text-slate-900">
+                                                                                    <span id="modal-base-lgd">38.0%</span> → <span id="modal-stressed-lgd" class="text-rose-700">54.2%</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="bg-rose-50 border border-rose-200 rounded p-2.5 flex items-center justify-between text-xs mt-2">
+                                                                            <div>
+                                                                                <span class="text-rose-900 block font-semibold">Stressed Facility Expected Loss (EL)</span>
+                                                                                <span class="text-rose-700 text-[10px]">Base: <span id="modal-base-el" class="font-mono">$0.11M</span>
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class="text-right">
+                                                                            <div id="modal-stressed-el" class="font-mono font-bold text-rose-800 text-sm">$0.64M</div>
+                                                                            <span id="modal-el-delta" class="font-mono text-[10px] text-rose-700 font-semibold">+$0.53M</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Green Climate Adaptation Capex Simulator -->
+                                                                <div class="border border-emerald-300 rounded p-3.5 bg-emerald-50/50 space-y-2.5">
+                                                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                                        <div class="flex items-center gap-2">
+                                                                            <span class="text-base">
+                                                                            </span>
+                                                                            <div>
+                                                                                <b class="text-xs text-emerald-950 uppercase tracking-wide">Green Climate Adaptation & Capex Simulator</b>
+                                                                                <span class="text-[10px] text-emerald-700 block">Simulate $1.5M engineered flood barriers, dykes & backup solar resilience</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <button id="btn-toggle-adaptation" type="button" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-3 py-1 rounded transition shadow-xs self-start sm:self-auto">Simulate Green Capex</button>
+                                                                    </div>
+                                                                    <div id="adaptation-results-panel" class="hidden space-y-2.5 pt-2 border-t border-emerald-200 text-xs">
+                                                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                                                                            <div class="p-2 bg-white rounded border border-emerald-200">
+                                                                                <span class="text-slate-500 block text-[10px]">Damage Reduction</span>
+                                                                                <b id="adap-damage-redux" class="text-emerald-700 font-mono text-xs">-32.0%</b>
+                                                                            </div>
+                                                                            <div class="p-2 bg-white rounded border border-emerald-200">
+                                                                                <span class="text-slate-500 block text-[10px]">Restored Rating</span>
+                                                                                <b id="adap-rating-shift" class="text-emerald-700 font-mono text-xs">BB ➔ A-</b>
+                                                                            </div>
+                                                                            <div class="p-2 bg-white rounded border border-emerald-200">
+                                                                                <span class="text-slate-500 block text-[10px]">5-Yr Loss Avoided</span>
+                                                                                <b id="adap-5yr-savings" class="text-emerald-700 font-mono text-xs">$2.45M</b>
+                                                                            </div>
+                                                                            <div class="p-2 bg-white rounded border border-emerald-200">
+                                                                                <span class="text-slate-500 block text-[10px]">Net Green ROI</span>
+                                                                                <b id="adap-roi" class="text-emerald-700 font-mono text-xs">+63.3%</b>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="p-2 bg-white rounded border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-emerald-900 gap-1">
+                                                                            <span>✅ <b>Bank Incentive:</b> Eligible for <b>50 bps (0.50%)</b> Green Concessional Loan Margin Discount</span>
+                                                                            <span class="font-mono font-bold text-emerald-700">BCBS Green Asset Ratio (GAR)</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                                                                <div class="flex flex-wrap items-center gap-2">
+                                                                    <button id="modal-btn-live-sat" class="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition">️ Query Live Satellite Weather</button>
+                                                                    <button onclick="printSingleBorrowerMemo()" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition">️ Print Single Facility Risk Memo</button>
+                                                                </div>
+                                                                <button onclick="closeBorrowerModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded text-xs font-semibold transition">Close Dossier</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- ==================== LIVE SATELLITE WEATHER MODAL ==================== -->
+                                                    <div id="satellite-weather-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bank-modal-overlay hidden">
+                                                        <div class="bg-white rounded-lg shadow-2xl border border-slate-300 max-w-md w-full overflow-hidden">
+                                                            <div class="bg-blue-950 text-white px-5 py-3.5 flex items-center justify-between">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="text-base">️</span>
+                                                                    <div>
+                                                                        <h4 class="font-bold text-xs uppercase tracking-wide">Live Satellite Meteorological Telemetry</h4>
+                                                                        <p id="sat-coords" class="text-[10px] text-blue-300 font-mono">GPS Coordinates</p>
+                                                                    </div>
+                                                                </div>
+                                                                <button onclick="closeSatelliteModal()" class="text-slate-400 hover:text-white text-lg font-bold">
+                                                                </button>
+                                                            </div>
+                                                            <div class="p-5 text-xs space-y-3">
+                                                                <div id="sat-loading-indicator" class="text-center py-6 text-slate-500 font-medium">
+                                                                    <span class="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mb-2">
+                                                                    </span>
+                                                                    <p>Connecting to Open-Meteo Satellite Feed...</p>
+                                                                </div>
+                                                                <div id="sat-data-content" class="hidden space-y-3">
+                                                                    <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                                                                        <span class="text-[10px] text-slate-500 block uppercase">Target Facility</span>
+                                                                        <b id="sat-entity-name" class="text-slate-800 text-sm">Target Company</b>
+                                                                    </div>
+                                                                    <div class="grid grid-cols-2 gap-2.5">
+                                                                        <div class="p-2.5 bg-blue-50 border border-blue-200 rounded">
+                                                                            <span class="text-[10px] text-blue-700 block">Temperature (2m)</span>
+                                                                            <div id="sat-temperature" class="text-base font-bold font-mono text-blue-950">--°C</div>
+                                                                            <span id="sat-thermal-badge" class="badge-reg badge-neutral text-[9px] mt-1">NOMINAL</span>
+                                                                        </div>
+                                                                        <div class="p-2.5 bg-blue-50 border border-blue-200 rounded">
+                                                                            <span class="text-[10px] text-blue-700 block">Precipitation Rate</span>
+                                                                            <div id="sat-precipitation" class="text-base font-bold font-mono text-blue-950">-- mm</div>
+                                                                            <span id="sat-precip-badge" class="badge-reg badge-neutral text-[9px] mt-1">DRY</span>
+                                                                        </div>
+                                                                        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded">
+                                                                            <span class="text-[10px] text-slate-500 block">Relative Humidity</span>
+                                                                            <div id="sat-humidity" class="text-sm font-bold font-mono text-slate-800">--%</div>
+                                                                        </div>
+                                                                        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded">
+                                                                            <span class="text-[10px] text-slate-500 block">Wind Velocity</span>
+                                                                            <div id="sat-wind" class="text-sm font-bold font-mono text-slate-800">-- km/h</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div id="sat-timestamp" class="text-[10px] text-slate-400 font-mono text-center pt-1"> Telemetry Source: Open-Meteo API                     </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="bg-slate-50 px-5 py-2.5 border-t border-slate-200 flex justify-end">
+                                                                <button onclick="closeSatelliteModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded text-xs font-semibold">Close Feed</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- ==================== REVERSE STRESS TESTING SOLVER MODAL ==================== -->
+                                                    <div id="reverse-stress-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bank-modal-overlay hidden">
+                                                        <div class="bg-white rounded-lg shadow-2xl border border-slate-300 max-w-xl w-full overflow-hidden">
+                                                            <div class="bg-amber-950 text-white px-5 py-3.5 flex items-center justify-between">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="text-base">
+                                                                    </span>
+                                                                    <div>
+                                                                        <h4 class="font-bold text-xs uppercase tracking-wide">Reverse Stress Testing Engine (Basel III / BCBS 239)</h4>
+                                                                        <p class="text-[10px] text-amber-300 font-mono">Insolvency & Regulatory Capital Breach Threshold Solver</p>
+                                                                    </div>
+                                                                </div>
+                                                                <button onclick="closeReverseStressModal()" class="text-slate-400 hover:text-white text-lg font-bold">
+                                                                </button>
+                                                            </div>
+                                                            <div class="p-5 text-xs space-y-4">
+                                                                <div class="p-3 bg-amber-50 rounded border border-amber-200 text-amber-900 leading-relaxed text-[11px]">
+                                                                    <b>Quantitative Breakeven Concept:</b> Reverse stress testing identifies the exact macro-hazard shock magnitude required to exhaust the bank's regulatory capital buffer and breach the statutory <b>10.50% Capital Adequacy Ratio (CAR)</b> floor.                 </div>
+                                                                    <div class="grid grid-cols-2 gap-3 text-center">
+                                                                        <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                                                                            <span class="text-slate-500 block text-[10px] uppercase font-semibold">Tipping Point Flood Severity</span>
+                                                                            <div id="rev-flood-tipping" class="font-mono font-bold text-xl text-rose-700 mt-1">--%</div>
+                                                                            <span class="text-[9px] text-slate-500 block mt-0.5">Causes CAR &lt; 10.50%</span>
+                                                                        </div>
+                                                                        <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                                                                            <span class="text-slate-500 block text-[10px] uppercase font-semibold">Tipping Point Carbon Tax</span>
+                                                                            <div id="rev-carbon-tipping" class="font-mono font-bold text-xl text-rose-700 mt-1">--%</div>
+                                                                            <span class="text-[9px] text-slate-500 block mt-0.5">Causes Statutory Breach</span>
+                                                                        </div>
+                                                                        <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                                                                            <span class="text-slate-500 block text-[10px] uppercase font-semibold">Absorbable Loss Buffer</span>
+                                                                            <div id="rev-loss-buffer" class="font-mono font-bold text-base text-slate-800 mt-1">$--M</div>
+                                                                            <span class="text-[9px] text-slate-500 block mt-0.5">Maximum Headroom</span>
+                                                                        </div>
+                                                                        <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                                                                            <span class="text-slate-500 block text-[10px] uppercase font-semibold">Expected Loss at Tipping Point</span>
+                                                                            <div id="rev-loss-tipping" class="font-mono font-bold text-base text-rose-700 mt-1">$--M</div>
+                                                                            <span class="text-[9px] text-slate-500 block mt-0.5">Catastrophic Impairment</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="p-3 bg-slate-900 text-white rounded text-[11px] space-y-1">
+                                                                        <div class="font-bold text-amber-400">Chief Risk Officer Recommendation:</div>
+                                                                        <p id="rev-recommendation" class="text-slate-300 leading-relaxed"> Calculating reverse stress solution...                     </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-between items-center">
+                                                                    <span class="text-[10px] text-slate-500 font-mono">Algorithm: Bisection Root-Finding on Tier 1 RWA</span>
+                                                                    <button onclick="closeReverseStressModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded text-xs font-semibold">Close Solver</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- ==================== EXECUTIVE BOARD BRIEFING MODAL (PRINT-READY) ==================== -->
+                                                        <div id="board-briefing-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bank-modal-overlay hidden">
+                                                            <div class="bg-white rounded-lg shadow-2xl border border-slate-300 max-w-3xl w-full overflow-hidden max-h-[90vh] flex flex-col">
+                                                                <div class="bg-blue-950 text-white px-6 py-4 flex items-center justify-between no-print">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="font-serif text-amber-300 font-bold text-lg">WB</span>
+                                                                        <div>
+                                                                            <h3 class="font-bold text-sm uppercase">Executive Board Risk Briefing Document</h3>
+                                                                            <p class="text-xs text-blue-200">Formal World Bank Group Climate Stress Testing Audit Report</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="flex items-center gap-2">
+                                                                        <button onclick="window.print()" class="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-semibold shadow-xs">️ Print / Save PDF</button>
+                                                                        <button onclick="closeBoardBriefingModal()" class="text-slate-400 hover:text-white text-lg font-bold p-1">
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Formal Letterhead Body -->
+                                                                <div class="p-8 space-y-6 text-xs text-slate-800 overflow-y-auto font-serif flex-1">
+                                                                    <div class="border-b-2 border-slate-900 pb-4 flex justify-between items-start">
+                                                                        <div>
+                                                                            <h2 class="text-lg font-bold tracking-tight text-slate-950 font-sans uppercase">World Bank Financial Stability Board</h2>
+                                                                            <p class="text-xs text-slate-600 font-sans">Multi-Hazard Climate Credit Stress Testing Audit Memorandum • Ref: FIN-01</p>
+                                                                        </div>
+                                                                        <div class="text-right font-mono text-[11px] text-slate-600">
+                                                                            <div>Date: October 2026</div>
+                                                                            <div>Audit Fingerprint: <span id="board-audit-hash" class="font-bold text-slate-900">WB-AUDIT-XXXX</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="space-y-3 font-sans text-xs">
+                                                                        <h4 class="font-bold uppercase tracking-wider text-slate-900 border-b pb-1">1. Executive Governance Summary</h4>
+                                                                        <p class="text-slate-700 leading-relaxed"> This memorandum presents the results of portfolio-wide climate stress testing executed under the <b>Basel III Regulatory Capital Framework</b> and <b>NGFS (Network for Greening the Financial System)</b> macro-financial scenarios. Geospatial physical hazard overlays (100-year riverine floods and sustained heatwaves) were modeled against active commercial facility collaterals.                     </p>
+                                                                    </div>
+                                                                    <div class="font-sans">
+                                                                        <h4 class="font-bold uppercase tracking-wider text-slate-900 border-b pb-1 text-xs mb-2">2. Portfolio Stress Metrics</h4>
+                                                                        <table class="w-full text-xs border border-slate-300 text-left">
+                                                                            <tbody class="divide-y divide-slate-200">
+                                                                                <tr class="bg-slate-50">
+                                                                                    <td class="p-2 font-semibold">Total Portfolio Exposure (EAD)</td>
+                                                                                    <td id="board-portfolio-ead" class="p-2 font-mono font-bold text-right">$1,913.9M</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="p-2 font-semibold">Stressed Expected Loss (EL)</td>
+                                                                                    <td id="board-stressed-el" class="p-2 font-mono font-bold text-rose-700 text-right">$48.77M</td>
+                                                                                </tr>
+                                                                                <tr class="bg-slate-50">
+                                                                                    <td class="p-2 font-semibold">Expected Loss Expansion Surge</td>
+                                                                                    <td id="board-el-surge" class="p-2 font-mono font-bold text-rose-700 text-right">+184.2%</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="p-2 font-semibold">Stressed Capital Adequacy Ratio (CAR)</td>
+                                                                                    <td id="board-stressed-car" class="p-2 font-mono font-bold text-blue-900 text-right">11.69%</td>
+                                                                                </tr>
+                                                                                <tr class="bg-slate-50">
+                                                                                    <td class="p-2 font-semibold">Statutory Basel Minimum Threshold</td>
+                                                                                    <td class="p-2 font-mono font-bold text-right">10.50%</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="p-2 font-semibold">Facilities Classified Critical / Impaired</td>
+                                                                                    <td id="board-critical-count" class="p-2 font-mono font-bold text-rose-700 text-right">26 Facilities</td>
+                                                                                </tr>
+                                                                                <tr class="bg-slate-50">
+                                                                                    <td class="p-2 font-semibold">IFRS 9 Provisioning Requirement (Stage 1-3)</td>
+                                                                                    <td id="board-ifrs9-provision" class="p-2 font-mono font-bold text-rose-700 text-right">$0.00M</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="p-2 font-semibold">Statutory Capital Compliance Status</td>
+                                                                                    <td id="board-compliance-status" class="p-2 font-mono font-bold text-emerald-700 text-right">REGULATORY CAPITAL ADEQUATE</td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                    <!-- Section 3: Itemized Facility Annexure Schedule -->
+                                                                    <div class="font-sans">
+                                                                        <div class="flex items-center justify-between border-b pb-1 mb-2">
+                                                                            <h4 class="font-bold uppercase tracking-wider text-slate-900 text-xs">3. Portfolio Stressed Facility Annexure Schedule</h4>
+                                                                            <span id="board-schedule-count" class="text-[10px] text-slate-500 font-mono">40 Facilities Evaluated</span>
+                                                                        </div>
+                                                                        <div class="max-h-56 overflow-y-auto border border-slate-300 rounded shadow-2xs">
+                                                                            <table class="w-full text-[10px] text-left border-collapse">
+                                                                                <thead class="bg-slate-100 text-slate-700 font-bold sticky top-0 border-b border-slate-300">
+                                                                                    <tr>
+                                                                                        <th class="p-1.5">Borrower Corporate Entity</th>
+                                                                                        <th class="p-1.5">Sector</th>
+                                                                                        <th class="p-1.5 text-right">EAD ($M)</th>
+                                                                                        <th class="p-1.5 text-center">Rating</th>
+                                                                                        <th class="p-1.5 text-right">Damage %</th>
+                                                                                        <th class="p-1.5 text-right">Stressed EL</th>
+                                                                                        <th class="p-1.5 text-center">Risk Tier</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody id="board-facility-table-body" class="divide-y divide-slate-200 font-mono">
+                                                                                    <!-- Populated dynamically by openBoardBriefing() -->
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="space-y-2 font-sans text-xs">
+                                                                        <h4 class="font-bold uppercase tracking-wider text-slate-900 border-b pb-1">4. Chief Risk Officer Certification & Cryptographic Seal</h4>
+                                                                        <p class="text-slate-600 text-[11px] leading-relaxed"> I hereby attest that the risk transformations modeled above strictly follow Basel Committee on Banking Supervision (BCBS 239) and World Bank Global Flood Exposure methodology.                     </p>
+                                                                        <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-slate-300">
+                                                                            <!-- Digital Verification QR & Hash -->
+                                                                            <div class="flex items-center gap-3">
+                                                                                <div class="w-16 h-16 bg-white p-1 border-2 border-slate-900 rounded flex flex-col items-center justify-center text-center font-mono">
+                                                                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                        <rect x="2" y="2" width="8" height="8" rx="1"/>
+                                                                                        <rect x="14" y="2" width="8" height="8" rx="1"/>
+                                                                                        <rect x="2" y="14" width="8" height="8" rx="1"/>
+                                                                                        <rect x="14" y="14" width="4" height="4"/>
+                                                                                        <line x1="18" y1="20" x2="22" y2="20"/>
+                                                                                        <line x1="20" y1="18" x2="20" y2="22"/>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <div class="text-[10px] text-slate-600 font-mono">
+                                                                                    <div class="font-bold text-slate-900 uppercase">BCBS-239 Cryptographic Seal</div>
+                                                                                    <div id="board-qr-hash" class="text-blue-900 font-bold">WB-AUDIT-XXXX</div>
+                                                                                    <div class="text-emerald-700 font-semibold">SECURE & VERIFIED</div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <!-- Sign-off signatures -->
+                                                                            <div class="grid grid-cols-2 gap-6 text-[11px] font-sans flex-1">
+                                                                                <div class="border-t border-slate-400 pt-1">
+                                                                                    <b>Chief Risk Officer (CRO)</b>
+                                                                                    <br>
+                                                                                    <span class="text-slate-500">World Bank Global Credit Risk Unit</span>
+                                                                                </div>
+                                                                                <div class="border-t border-slate-400 pt-1 text-right">
+                                                                                    <b>Chief Climate Economist</b>
+                                                                                    <br>
+                                                                                    <span class="text-slate-500">Financial Stability Directorate</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- ==================== AI RISK COPILOT (DOCKABLE / FLOATING CHAT) ==================== -->
+                                                        <div id="ai-copilot-container" class="fixed bottom-5 right-5 z-50">
+                                                            <!-- Trigger Button -->
+                                                            <button id="ai-copilot-toggle-btn" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 border border-slate-700 transition transform hover:scale-105 cursor-pointer">
+                                                                <span class="relative flex h-3 w-3">
+                                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75">
+                                                                    </span>
+                                                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500">
+                                                                    </span>
+                                                                </span>
+                                                                <span class="text-xs font-bold uppercase tracking-wider">AI Risk Copilot</span>
+                                                            </button>
+                                                            <!-- Chat Drawer Panel (Hidden by default) -->
+                                                            <div id="ai-copilot-panel" class="hidden absolute bottom-14 right-0 w-[92vw] sm:w-[480px] md:w-[530px] max-h-[82vh] bg-white rounded-xl shadow-2xl border border-slate-300 flex flex-col overflow-hidden">
+                                                                <!-- Panel Header -->
+                                                                <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
+                                                                    <div class="flex items-center gap-2.5">
+                                                                        <span class="text-base">
+                                                                        </span>
+                                                                        <div>
+                                                                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-100">AI Credit Risk Analyst Copilot</h4>
+                                                                            <p class="text-[10px] text-slate-400">Basel III • NGFS Scenarios • Active Portfolio Intelligence</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="flex items-center gap-1.5">
+                                                                        <button id="ai-copilot-clear-btn" title="Clear Chat History" class="text-slate-400 hover:text-slate-200 p-1 text-xs">️</button>
+                                                                        <button id="ai-copilot-close-btn" class="text-slate-400 hover:text-white p-1 text-sm font-bold">
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Quick Action Prompt Chips -->
+                                                                <div class="bg-slate-100/80 border-b border-slate-200 px-3 py-2 flex items-center gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
+                                                                    <span class="text-slate-500 font-bold text-[10px] uppercase">Quick:</span>
+                                                                    <button class="ai-prompt-chip bg-white border border-slate-300 hover:border-blue-600 hover:text-blue-700 px-2 py-0.5 rounded text-slate-700 transition" data-prompt="Analyze Apex Global Logistics facility">Apex Global</button>
+                                                                    <button class="ai-prompt-chip bg-white border border-slate-300 hover:border-blue-600 hover:text-blue-700 px-2 py-0.5 rounded text-slate-700 transition" data-prompt="Analyze Kalyan Heavy Alloys Corp">Kalyan Heavy</button>
+                                                                    <button class="ai-prompt-chip bg-white border border-slate-300 hover:border-blue-600 hover:text-blue-700 px-2 py-0.5 rounded text-slate-700 transition" data-prompt="Check Basel III Liquidity Coverage Ratio (LCR)">LCR Liquidity</button>
+                                                                    <button class="ai-prompt-chip bg-white border border-slate-300 hover:border-blue-600 hover:text-blue-700 px-2 py-0.5 rounded text-slate-700 transition" data-prompt="Show PCAF Financed Emissions and Carbon Tax sensitivity">PCAF Carbon</button>
+                                                                    <button class="ai-prompt-chip bg-white border border-slate-300 hover:border-blue-600 hover:text-blue-700 px-2 py-0.5 rounded text-slate-700 transition" data-prompt="What is the Reverse Stress Testing tipping point for insolvency?">Reverse Stress</button>
+                                                                    <button class="ai-prompt-chip bg-white border border-slate-300 hover:border-blue-600 hover:text-blue-700 px-2 py-0.5 rounded text-slate-700 transition" data-prompt="Which facilities get submerged at 3 meter surge?">Submerged Assets</button>
+                                                                    <button class="ai-prompt-chip bg-white border border-slate-300 hover:border-blue-600 hover:text-blue-700 px-2 py-0.5 rounded text-slate-700 transition" data-prompt="Summarize IFRS 9 staging provisions">IFRS 9 Provisions</button>
+                                                                </div>
+                                                                <!-- Messages Thread -->
+                                                                <div id="ai-copilot-messages" class="flex-1 p-3.5 space-y-3 overflow-y-auto text-xs min-h-[300px] max-h-[440px] bg-slate-50/50">
+                                                                    <!-- Welcome message -->
+                                                                    <div class="p-3 rounded-lg bg-white border border-slate-200 shadow-xs text-slate-800 space-y-2">
+                                                                        <div class="flex items-center gap-2 font-bold text-slate-900 text-xs">
+                                                                            <span class="w-2 h-2 rounded-full bg-blue-600">
+                                                                            </span> Institutional Credit Risk Analyst Initialized                     </div>
+                                                                            <p class="text-[11px] text-slate-600 leading-relaxed"> I am fully trained and grounded in your active loan portfolio, Basel III / BCBS 239 regulatory capital guidelines, PCAF Scope 1-3 financed emissions, and topographical flood inundation models.                     </p>
+                                                                            <p class="text-[11px] text-slate-600"> Ask me about any specific borrower (e.g. <em>"Analyze Tata Power"</em> or <em>"Kalyan Heavy Alloys"</em>), balance sheet liquidity (LCR), capital adequacy (CAR), reverse stress tipping points, or flood inundation depths.                     </p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- Input Bar -->
+                                                                    <div class="bg-white p-2.5 border-t border-slate-200 flex items-center gap-2">
+                                                                        <input type="text" id="ai-copilot-input" placeholder="Ask about borrowers, CAR, LCR, PCAF carbon, formulas..." class="flex-1 bg-slate-50 border border-slate-300 rounded-md px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-blue-600 transition">
+                                                                        <button id="ai-copilot-send-btn" class="bg-blue-800 hover:bg-blue-900 text-white px-3.5 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1 shadow-xs cursor-pointer">
+                                                                            <span>Send</span>
+                                                                            <span>
+                                                                            </span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- Application Controller Script -->
+                                                            <script src="/static/js/app.js">
+                                                            </script>
+                                                        </body>
+                                                    </html>
